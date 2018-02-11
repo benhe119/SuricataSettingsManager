@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="com.bmstu.suricata.settings.manager.service.SuricataSettingsManager">
+   <service>
+      <provide interface="com.bmstu.suricata.settings.manager.ISuricataSettingsManager"/>
+   </service>
+   <implementation class="com.bmstu.suricata.settings.manager.service.SuricataSettingsManager"/>
+</scr:component>

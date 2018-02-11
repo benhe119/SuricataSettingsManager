@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Client
+Bundle-SymbolicName: com.bmstu.suricata.settings.manager.client
+Bundle-Version: 1.0.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.bmstu.suricata.settings.manager;version="[1.0.0,2.0.0)",
+ com.bmstu.suricata.settings.manager.model;version="[1.0.0,2.0.0)"
+Bundle-ActivationPolicy: lazy
+Service-Component: OSGI-INF/com.bmstu.suricata.settings.manager.client.SuricataRuleSetSettingsClient.xml,
+ OSGI-INF/com.bmstu.suricata.settings.manager.client.SuricataRuleSettingsClient.xml
