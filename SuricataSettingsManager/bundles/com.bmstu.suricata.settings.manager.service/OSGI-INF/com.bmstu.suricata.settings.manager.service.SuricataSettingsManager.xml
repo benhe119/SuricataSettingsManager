@@ -3,5 +3,6 @@
    <service>
       <provide interface="com.bmstu.suricata.settings.manager.ISuricataSettingsManager"/>
    </service>
+   <reference bind="bindSuricataPathFinder" interface="com.bmstu.suricata.settings.manager.ISuricataPathFinder" name="SuricataPathFinder"/>
    <implementation class="com.bmstu.suricata.settings.manager.service.SuricataSettingsManager"/>
 </scr:component>

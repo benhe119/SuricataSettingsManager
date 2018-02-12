@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Service
+Bundle-SymbolicName: com.bmstu.suricata.settings.manager.path.service
+Bundle-Version: 1.0.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.bmstu.suricata.settings.manager;version="[1.0.0,2.0.0)"
+Service-Component: OSGI-INF/com.bmstu.suricata.settings.manager.path.service.CourseworkSuricataPathFinder.xml
+Bundle-ActivationPolicy: lazy

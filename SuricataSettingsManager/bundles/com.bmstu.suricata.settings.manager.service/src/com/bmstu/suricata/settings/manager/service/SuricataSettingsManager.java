@@ -7,7 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
+import com.bmstu.suricata.settings.manager.ISuricataPathFinder;
 import com.bmstu.suricata.settings.manager.ISuricataSettingsManager;
 import com.bmstu.suricata.settings.manager.model.Rule;
 import com.bmstu.suricata.settings.manager.model.RuleSet;
@@ -22,16 +24,17 @@ import com.bmstu.suricata.settings.manager.model.RuleSet;
 @Component
 public class SuricataSettingsManager implements ISuricataSettingsManager {
 
-	private static final String SURICATA_ROOT = "C:\\Suricata\\";
-	private static final String PATH_TO_SURICATA_SETTINGS = SURICATA_ROOT + "suricata.yaml";
+	private static final String PATH_TO_SURICATA_SETTINGS = "suricata.yaml";
 	private static final String RULE_FILES = "rule-files";
 	private static final String COMMENT_CHAR = "#";
 	private static final String DASH_CHAR = "-";
 
+	private ISuricataPathFinder suricataPathFinder;
+
 	@Override
 	public void addRuleSet(RuleSet ruleSet) {
 		try {
-			List<String> lines = Files.readAllLines(Paths.get(PATH_TO_SURICATA_SETTINGS));
+			List<String> lines = Files.readAllLines(Paths.get(getSuricataSettings()));
 			int ruleSetsStartLineIndex = getRuleSetsStartIndex(lines);
 			int ruleSetsEndLineIndex = getRuleSetsEndIndex(lines, ruleSetsStartLineIndex);
 
@@ -48,7 +51,7 @@ public class SuricataSettingsManager implements ISuricataSettingsManager {
 				lines = insertRuleSet(ruleSet, lines, ruleSetsEndLineIndex);
 			}
 
-			rewriteFile(PATH_TO_SURICATA_SETTINGS, lines);
+			rewriteFile(getSuricataSettings(), lines);
 		}
 		catch (IOException e) {
 			e.printStackTrace();
@@ -58,14 +61,14 @@ public class SuricataSettingsManager implements ISuricataSettingsManager {
 	@Override
 	public void removeRuleSet(RuleSet ruleSet) {
 		try {
-			List<String> lines = Files.readAllLines(Paths.get(PATH_TO_SURICATA_SETTINGS));
+			List<String> lines = Files.readAllLines(Paths.get(getSuricataSettings()));
 			int ruleSetsStartLineIndex = getRuleSetsStartIndex(lines);
 			int ruleSetsEndLineIndex = getRuleSetsEndIndex(lines, ruleSetsStartLineIndex);
 
 			int ruleSetLineIndex = getRuleSetLineIndex(ruleSet, lines, ruleSetsStartLineIndex, ruleSetsEndLineIndex);
 			if (ruleSetLineIndex > ruleSetsStartLineIndex) {
 				lines = removeLine(ruleSetLineIndex, lines);
-				rewriteFile(PATH_TO_SURICATA_SETTINGS, lines);
+				rewriteFile(getSuricataSettings(), lines);
 			}
 		}
 		catch (IOException e) {
@@ -76,10 +79,10 @@ public class SuricataSettingsManager implements ISuricataSettingsManager {
 	@Override
 	public void addRule(String path, Rule rule) {
 		try {
-			List<String> lines = Files.readAllLines(Paths.get(SURICATA_ROOT + path));
+			List<String> lines = Files.readAllLines(Paths.get(getSuricataRoot() + path));
 			int ruleLineIndex = getRuleLineIndex(lines, rule);
 
-			if (ruleLineIndex > 0) {
+			if (ruleLineIndex >= 0) {
 				if (isRuleCommented(lines.get(ruleLineIndex))) {
 					lines = uncommentRuleLine(lines, ruleLineIndex);
 				}
@@ -91,7 +94,7 @@ public class SuricataSettingsManager implements ISuricataSettingsManager {
 				lines = insertRule(lines, rule);
 			}
 
-			rewriteFile(SURICATA_ROOT + path, lines);
+			rewriteFile(getSuricataRoot() + path, lines);
 		}
 		catch (IOException e) {
 			e.printStackTrace();
@@ -101,18 +104,34 @@ public class SuricataSettingsManager implements ISuricataSettingsManager {
 	@Override
 	public void removeRule(String path, Rule rule) {
 		try {
-			List<String> lines = Files.readAllLines(Paths.get(SURICATA_ROOT + path));
+			List<String> lines = Files.readAllLines(Paths.get(getSuricataRoot() + path));
 			int ruleLineIndex = getRuleLineIndex(lines, rule);
 
-			if (ruleLineIndex > 0 && !isRuleCommented(lines.get(ruleLineIndex))) {
+			if (ruleLineIndex >= 0 && !isRuleCommented(lines.get(ruleLineIndex))) {
 				lines = removeLine(ruleLineIndex, lines);
-				rewriteFile(SURICATA_ROOT + path, lines);
+				rewriteFile(getSuricataRoot() + path, lines);
 			}
 
 		}
 		catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Reference(unbind = "-")
+	public void bindSuricataPathFinder(ISuricataPathFinder suricataPathFinder)
+	{
+		this.suricataPathFinder = suricataPathFinder;
+	}
+
+	private String getSuricataRoot()
+	{
+		return suricataPathFinder.getSuricataPath();
+	}
+
+	private String getSuricataSettings()
+	{
+		return getSuricataRoot() + PATH_TO_SURICATA_SETTINGS;
 	}
 
 	private int getRuleSetsStartIndex(List<String> lines) {
